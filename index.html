@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Session 21</title>
+</head>
+<body>
+<h1>Call back and promise session</h1>
+<script>
+    // ************************  data received from another source ( e.g backend )
+    var Results = []
+
+    // ***********************************  first solution to load a script
+    function loadMyTest(src){
+        let script = document.createElement('script')
+        script.src = src
+        document.head.append(script)
+    }
+    //******************************* check results function
+    function printResults() {
+        console.log('Check and store results ...',Results)
+    }
+
+    //******************************************** 1st solution : a callback function
+    function loadMyTestWithCallBack(src, callback) {
+        let script = document.createElement('script')
+        script.src = src
+        // ******************* apply call back
+        script.onload = () => callback(script)
+        document.head.append(script)
+    }
+
+    //********************************************* 2nd add handling error
+    function loadMyTestWithCallBack_Error(src, callback) {
+        let script = document.createElement('script')
+        script.src = src   // null , to test Error
+        // ******************* apply call back
+        script.onload = () => callback(null,script)
+        script.onerror = () => callback(new Error(`impossible to load - ${src}`))
+        document.head.append(script)
+    }
+
+    // ************************** MAIN program
+    //loadMyTest('test.js')
+    // ******************************************* CALL with calback function 'error-first ' style
+    loadMyTestWithCallBack_Error('test.js', (error) =>{
+        if(error) {
+            console.log('Load Error: '+error.message)
+        }else {
+            Results.push({name:'mihaela'})
+            printResults()
+        }
+     })
+
+    console.log('code after loadMyTest... call')
+    //printResults() // use at first call loadMyTest
+    // ********************************************* CALL with callback function definition
+    /*
+    loadMyTestWithCallBack('test.js', () => {   // callback fct using arrow fct
+        Results.push({name:'dani'})
+        printResults()
+    })
+    */
+    //************************** PROMISE , how it works ?
+    function resolve(str) {
+        console.log('Resolve...'+str)
+    }
+    function reject(str) {
+        console.log('Error ...'+str)
+    }
+    // ********************************************* Constructor of the PROMISE object
+    let myObject = new Promise((res,rej) => {
+        // Code PRODUCER / Executor
+        console.log('Executor Promise myObject')
+        //reject('producer reject')   //***************** only one reject or resolve changes the state of promise
+        //resolve('producer resolve...')
+        setTimeout(() => {   //******************* simulate time spent for code producer
+            //reject(new Error('timeout'))
+            res('timeout')
+        },5000)
+    })
+    myObject.then(resolve,reject) // link CONSUMERS : then , catch...
+
+</script>
+</body>
+</html>
