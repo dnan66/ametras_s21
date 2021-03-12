@@ -43,6 +43,7 @@
     // ************************** MAIN program
     //loadMyTest('test.js')
     // ******************************************* CALL with calback function 'error-first ' style
+    /*
     loadMyTestWithCallBack_Error('test.js', (error) =>{
         if(error) {
             console.log('Load Error: '+error.message)
@@ -55,19 +56,21 @@
     console.log('code after loadMyTest... call')
     //printResults() // use at first call loadMyTest
     // ********************************************* CALL with callback function definition
-    /*
+
     loadMyTestWithCallBack('test.js', () => {   // callback fct using arrow fct
         Results.push({name:'dani'})
         printResults()
     })
     */
     //************************** PROMISE , how it works ?
+    /*
     function resolve(str) {
         console.log('Resolve...'+str)
     }
     function reject(str) {
         console.log('Error ...'+str)
     }
+
     // ********************************************* Constructor of the PROMISE object
     let myObject = new Promise((res,rej) => {
         // Code PRODUCER / Executor
@@ -79,7 +82,122 @@
             res('timeout')
         },5000)
     })
+
     myObject.then(resolve,reject) // link CONSUMERS : then , catch...
+   */
+
+    //****************** define function to load script using PROMISE
+    /*
+    function loadMyTestWithPromise(src) {
+        return new Promise( (resolve, reject) => {
+            let script = document.createElement('script')
+            script.src = null
+            script.onload = () => resolve(script)
+            script.onerror = () => reject(new Error(`impossible to load - ${src}`))
+            document.head.append(script)
+        })
+    }
+    //********************* how to use load script with Promise - benefits ?
+    let myPromise = loadMyTestWithPromise('test.js')
+
+    myPromise.then(
+        (resolve_param) => alert(`result: ${resolve_param.src} is loaded`),
+        (error_param) => alert(`reject: ${error_param.message}`)
+    )
+
+    // using short form and 2nd 'consumer' ...
+     loadMyTestWithPromise('test.js').then(
+        res => alert('2nd resolve'),
+        rej => alert('2nd reject')
+    )
+     */
+    // .. PROMISE CHAINING scope => how to cover a sequences of asynchronous tasks ?
+
+    // ****** Use case:  simulates several asynchronous tasks that use results between them
+    // ****** e.g compute value and transfer to the next consumer
+
+    // ************************ CASE 1  => 'false' chaining consumers  , one Promise object - transfer result
+   /*
+    new Promise((resolve, reject) => {
+        // Producer
+        setTimeout(() => resolve(1), 5000); // wait 5 seconds then call resolve
+
+    }).then( (result) => { // first consumer
+
+        alert('Compute result: '+result) // show value
+        return result * 2
+
+    }).then((result) => { // second consumer
+
+        alert('Compute result: '+result)
+        return result * 2
+
+    }).then((result) => { // third consumer
+
+        alert('Compute result: '+result)
+        return result * 2
+
+    })
+    */
+
+    // ****************************** CASE 2  => several consumers - ONE promise object
+    /*
+    let mySecondCase = new Promise((resolve, reject) => {
+        // Producer
+        setTimeout(() => resolve(1), 5000) // wait 5 seconds then call resolve
+    })
+
+    mySecondCase.then( (result) => {  // first consumer
+        alert('Compute result: '+result) // show value
+        return result * 2
+    })
+
+    mySecondCase.then( (result) => {  // second consumer
+        alert('Compute result: '+result) // show value
+        return result * 2
+    })
+
+    mySecondCase.then( (result) => {  // third consumer
+        alert('Compute result: '+result) // show value
+        return result * 2
+    })
+
+
+   */
+    // ************************************** CASE 3 => real chaining , focus on asynchronous tasks
+
+    new Promise((resolve, reject) => {
+        // Producer
+        setTimeout(() => resolve(1), 2000); // wait 2 seconds then call resolve
+
+    }).then( (result) => { // first consumer
+
+        alert('Compute result: '+result) // show value
+        return new Promise( (res,rej) => {
+            // next Producer
+            setTimeout(() => res(result * 2), 5000); // wait 5 seconds then call resolve
+        })
+
+    }).then((result) => { // second consumer
+
+        alert('after 5s...Compute result: '+result)
+        return new Promise( (res,rej) => {
+            // next Producer
+            setTimeout(() => res(result * 2), 9000); // wait 9 seconds then call resolve
+        })
+
+    }).then((result) => { // third consumer
+
+        alert('after 9s...Compute result: '+result)
+        return result*2
+
+    }).then( (result) => {
+        alert('finish...'+result)
+    })
+
+    //  Next... use Promise in FrontEnd to create  network requests and analyse network response (AJAX mechanism)
+    // FETCH : method is modern and versatile ,window object ,  not supported for old browsers
+
 
 </script>
 </body>
