@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Session 21</title>
+    <title>Session 21..24</title>
 </head>
 <body>
-<h1>Call back and promise session</h1>
+<h3 style="color: crimson">Call backs, promise, fetch, axios ... HTTP network requests</h3>
 <script>
     // ************************  data received from another source ( e.g backend )
     var Results = []
@@ -165,7 +165,7 @@
 
    */
     // ************************************** CASE 3 => real chaining , focus on asynchronous tasks
-
+    /*
     new Promise((resolve, reject) => {
         // Producer
         setTimeout(() => resolve(1), 2000); // wait 2 seconds then call resolve
@@ -194,9 +194,145 @@
     }).then( (result) => {
         alert('finish...'+result)
     })
+    */
+    // Next... use Promise in FrontEnd to create network requests and analyse network response (AJAX mechanism)
 
-    //  Next... use Promise in FrontEnd to create  network requests and analyse network response (AJAX mechanism)
-    // FETCH : method is modern and versatile ,window object ,  not supported for old browsers
+    // Sending an HTTP request to an API ( CRUD )
+
+    // FETCH : modern and versatile ,Browser native API (window object),  not supported for old browsers
+    // AXIOS : install package
+    // cURL  : command line tool
+
+    // ********************************** Main features, particularities and use case Axios vs Fetch
+    // CRUD operations
+    // Automatic/Manual JSON parsing
+    // Interceptors
+    // Error handling
+
+    // ************************ USE CASE fetch(url, [options]) : apply PROMISE concept
+
+    fetch('https://blooming-tor-87436.herokuapp.com/producers').then( response => {  // GET method
+        console.log('1st then : Server response received ',response)
+       return response.json()   // return only response
+    }).then(rsp => {
+        console.log('2nd response : Server says ', rsp)
+        throw Error('test Throw error')                //**** Error handling , 'try-catch invisible (producer code)'
+    }).catch(error => {
+        alert('error message: ' +error.message)
+    })
+
+
+    // *****************  using  Options
+
+    const options = {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8'
+        }
+    }
+
+    let resourceId = 3
+    fetch('https://blooming-tor-87436.herokuapp.com/producers/'+resourceId, options)
+        .then(response => response.json())  // return implict
+        .then(rsp => {
+            console.log(rsp)
+            let data = []
+            data.push(rsp)
+            return JSON.stringify(data)  //********************** MANUAL parse response
+        }).then(result => {
+            alert('Data from backend for resourceId: '+resourceId + '\n'+result)
+    })
+
+    // REMINDER -> ... operator
+
+    let values = [1,2,3,4,5,6]
+    let testSpecial = [23,...values]
+
+    console.log(testSpecial)
+
+    function myArguments(a,b,...rest) {
+        let d = a*b;
+        console.log(d)
+        console.log(rest)
+    }
+    myArguments(...values)
+   /************************************ Axios pseudo code
+   // axios.interceptors.request.use(....)
+
+   // ******************************* Overwriting the fetch to inject interceptors */
+
+    /*
+    fetch = (originalFetch => { //define an Immediately-invoked Function Expressions(IIFE) using arrow function form
+        return (...arguments) => {
+            console.log('Fetch Interceptor : Adding headers')
+            arguments[1].headers = {
+                'Token': 'XDRC345646xmcnvbxmnvmn'
+            }
+            return originalFetch.apply(this, arguments)   // every js function is a Function object (built in)
+        }
+    })(fetch)   // call fetch
+
+    fetch('https://blooming-tor-87436.herokuapp.com/producers/5', { method: 'GET' })
+        .then(response => response.json())  // !!! short form , implicit return
+        .then(data => {
+            console.log('Get data from backend',data)
+        })
+
+      */
+
+    // **************************** Error Handling
+    // Client errors (400–499)
+    // Server errors (500–599)
+
+    //Axios err code 400 bad request , 404 not found => catch
+
+
+    fetch('https://blooming-tor-87436.herokuapp.com/producers/5')
+        .then(response => {
+            //console.log(response.status)
+
+            if(response.ok) {
+                console.log('status ok, code:'+response.status)
+            }else {
+                console.log('status nok, code:'+response.status)
+                throw Error('Code-'+response.status)
+            }
+            return response.json()
+        })
+        .then(data => {
+            console.log('Get data from backend',data)
+        }).catch(err => {
+            alert('JS error: ' +err.message)
+    })
+
+
+
+    // ***************************************** async/await ,  Promise.all
+    async function myAsyncFunction() {   // inject a promise at return
+        return 'async role'
+    }
+    // call the function
+    myAsyncFunction().then( r => {
+        alert(r)
+    })
+
+    // what about await ? -> !!! use inside async function
+    async function myAsyncAndAwaitFunction() {
+
+        let promiseObj = new Promise((resolve, reject) => {
+            setTimeout(() => resolve("done after 3s"), 5000) //3s
+        })
+
+        let result = await promiseObj // wait until the promise resolves (*)
+        console.log(result)
+        alert(result)
+        return 'finish'  // return a string , get a promise
+    }
+    // call the function
+    myAsyncAndAwaitFunction().then(rsp => {
+        console.log(rsp)
+    })
 
 
 </script>
